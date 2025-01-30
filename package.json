@@ -1,6 +1,7 @@
 {
   "name": "average-calc",
-  "homepage": "https://aaronbeallgithub.io/average-calc",
+  "homepage": "https://aaronbeall.github.io/average-calc",
+  "description": "Averages Calculator (Vite + React + TypeScript + Bootstrap)",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -12,8 +13,10 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
