@@ -1,6 +1,10 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState } from 'react';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type Results = {
   average: string;
@@ -36,10 +40,7 @@ const App: React.FC = () => {
 
   // Parse equation into an array of numbers
   const parseEquation = (equation: string): number[] => {
-    // Remove any spaces from the equation
     const sanitizedEquation = equation.replace(/\s+/g, '');
-
-    // Split by '+' or '-' while keeping the operators
     const regex = /([+-]?\d+(\.\d+)?)/g;
     const matches = sanitizedEquation.match(regex);
 
@@ -80,6 +81,20 @@ const App: React.FC = () => {
     setInputValue('');
     setNumbers([]);
     setResults(null);
+  };
+
+  // Prepare data for the line chart
+  const chartData = {
+    labels: numbers.map((_, index) => `Index ${index + 1}`),
+    datasets: [
+      {
+        label: 'Number Values',
+        data: numbers,
+        fill: false,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        tension: 0.1,
+      },
+    ],
   };
 
   return (
@@ -123,6 +138,14 @@ const App: React.FC = () => {
             <p><strong>Median: </strong>{results.median}</p>
             <p><strong>Mean: </strong>{results.mean}</p>
           </Alert>
+        </div>
+      )}
+
+      {/* Line Chart */}
+      {numbers.length > 0 && (
+        <div className="mt-5">
+          <h3>Line Graph of Numbers</h3>
+          <Line data={chartData} />
         </div>
       )}
     </Container>
