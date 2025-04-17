@@ -54,6 +54,13 @@ const App: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const savedPinnedSets = localStorage.getItem('pinnedSets');
+    if (savedPinnedSets) {
+      setPinnedSets(JSON.parse(savedPinnedSets));
+    }
+  }, []); // Ensure this runs only once on mount
+
   // Handle real-time parsing and calculation
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -134,6 +141,11 @@ const App: React.FC = () => {
     setResults(null);
   };
 
+  const updatePinnedSets = (newPinnedSets: PinnedSet[]) => {
+    setPinnedSets(newPinnedSets);
+    localStorage.setItem('pinnedSets', JSON.stringify(newPinnedSets)); // Save to local storage
+  };
+
   // Pin the current set of numbers and reset input
   const handlePinNumbers = () => {
     if (numbers.length > 0 && results) {
@@ -143,7 +155,7 @@ const App: React.FC = () => {
         results,
         name: `Pinned Set ${pinnedSets.length + 1}`, // Default name
       };
-      setPinnedSets([...pinnedSets, newPinnedSet]);
+      updatePinnedSets([...pinnedSets, newPinnedSet]); // Use helper function
       setInputValue('');
       setNumbers([]);
       setResults(null);
@@ -153,14 +165,14 @@ const App: React.FC = () => {
   const handleEditPinnedSetName = (index: number, newName: string) => {
     const updatedPinnedSets = [...pinnedSets];
     updatedPinnedSets[index].name = newName;
-    setPinnedSets(updatedPinnedSets);
+    updatePinnedSets(updatedPinnedSets); // Use helper function
   };
 
   const handleDeletePinnedSet = (index: number) => {
     if (window.confirm('Are you sure you want to delete this pinned set?')) {
       const updatedPinnedSets = [...pinnedSets];
       updatedPinnedSets.splice(index, 1);
-      setPinnedSets(updatedPinnedSets);
+      updatePinnedSets(updatedPinnedSets); // Use helper function
     }
   };
 
@@ -253,7 +265,7 @@ const App: React.FC = () => {
         )}
 
         {/* Pinned sets */}
-        {[...pinnedSets].reverse().map((set, idx) => ( // Reverse the order for newest on the left
+        {[...pinnedSets].reverse().map((set, idx) => ( // No need for null checks
           <div key={idx}>
             <Alert variant="secondary" style={{ position: 'relative' }}> {/* Add relative positioning */}
               <Button
