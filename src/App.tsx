@@ -47,12 +47,22 @@ const App: React.FC = () => {
     return matches ? matches.map((match) => parseFloat(match)) : [];
   };
 
-  // Calculate average, median, and mean
+  // Calculate mode, median, and mean
   const calculateStats = (nums: number[]) => {
     const sortedNumbers = [...nums].sort((a, b) => a - b);
     const length = sortedNumbers.length;
 
-    const average = nums.reduce((a, b) => a + b, 0) / length;
+    const frequencyMap: Record<number, number> = {};
+    nums.forEach((num) => {
+      frequencyMap[num] = (frequencyMap[num] || 0) + 1;
+    });
+
+    const maxFrequency = Math.max(...Object.values(frequencyMap));
+    const mode = Object.keys(frequencyMap)
+      .filter((key) => frequencyMap[Number(key)] === maxFrequency)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .join(', ');
 
     let median;
     if (length % 2 === 0) {
@@ -62,9 +72,9 @@ const App: React.FC = () => {
     }
 
     setResults({
-      average: average.toFixed(2),
+      average: mode, // Replacing "average" with "mode"
       median: median.toFixed(2),
-      mean: average.toFixed(2),
+      mean: (nums.reduce((a, b) => a + b, 0) / length).toFixed(2),
     });
   };
 
@@ -134,9 +144,9 @@ const App: React.FC = () => {
         <div className="mt-4">
           <Alert variant="info">
             <h4>Stats:</h4>
-            <p><strong>Average: </strong>{results.average}</p>
             <p><strong>Median: </strong>{results.median}</p>
             <p><strong>Mean: </strong>{results.mean}</p>
+            <p><strong>Mode: </strong>{results.average}</p>
           </Alert>
         </div>
       )}
