@@ -22,7 +22,7 @@ type PinnedSet = {
 
 // Number formatter for consistent formatting
 const numberFormatter = new Intl.NumberFormat('en-US', {
-  minimumFractionDigits: 2,
+  minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
@@ -176,6 +176,46 @@ const App: React.FC = () => {
     }
   };
 
+  const handleEditPinnedSetNumbers = (setIndex: number, newValue: string) => {
+    const updatedPinnedSets = [...pinnedSets];
+    const parsedNumbers = parseEquation(newValue); // Parse the input just like the main input
+
+    if (parsedNumbers.length > 0) {
+      const sortedNumbers = [...parsedNumbers].sort((a, b) => a - b);
+      const length = sortedNumbers.length;
+
+      const frequencyMap: Record<number, number> = {};
+      parsedNumbers.forEach((num) => {
+        frequencyMap[num] = (frequencyMap[num] || 0) + 1;
+      });
+
+      const maxFrequency = Math.max(...Object.values(frequencyMap));
+      const mode = parseFloat(
+        Object.keys(frequencyMap)
+          .filter((key) => frequencyMap[Number(key)] === maxFrequency)
+          .map(Number)
+          .sort((a, b) => a - b)
+          .join(', ')
+      );
+
+      let median;
+      if (length % 2 === 0) {
+        median = (sortedNumbers[length / 2 - 1] + sortedNumbers[length / 2]) / 2;
+      } else {
+        median = sortedNumbers[Math.floor(length / 2)];
+      }
+
+      updatedPinnedSets[setIndex].numbers = parsedNumbers;
+      updatedPinnedSets[setIndex].results = {
+        average: mode,
+        median: median,
+        mean: parsedNumbers.reduce((a, b) => a + b, 0) / length,
+      };
+
+      updatePinnedSets(updatedPinnedSets); // Use helper function
+    }
+  };
+
   // Generate a random vibrant color
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
@@ -186,12 +226,16 @@ const App: React.FC = () => {
     return color;
   };
 
+  const formatEquation = (numbers: number[]): string => {
+    return numbers.map((num, i) => (i === 0 ? num : (num >= 0 ? `+${num}` : `${num}`))).join(' ');
+  };
+
   // Prepare data for the line chart, including pinned sets
   const chartData = {
     labels: numbers.map((_, index) => `Index ${index + 1}`),
     datasets: [
-      ...pinnedSets.map((set, idx) => ({
-        label: `Pinned Set ${idx + 1}`,
+      ...pinnedSets.map((set) => ({
+        label: set.name, // Use the pinned set title name
         data: set.numbers,
         fill: false,
         borderColor: set.color, // Use color from PinnedSet
@@ -208,7 +252,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container className="mt-5">
+    <Container className="mt-5" fluid>
       <h1>Math Expression Stats</h1>
       <Form.Group controlId="formBasicEquation">
         <Form.Label>Enter a math equation (+ and - only):</Form.Label>
@@ -295,22 +339,22 @@ const App: React.FC = () => {
                   marginBottom: '8px',
                   outline: 'none',
                 }}
+                onFocus={(e) => (e.target.style.background = '#f8f9fa')} // Light gray background on focus
+                onBlur={(e) => (e.target.style.background = 'transparent')} // Reset background on blur
               />
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', border: `1px solid ${set.color}`, padding: '8px', borderRadius: '4px' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    maxWidth: '160px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    marginLeft: '8px',
-                  }}
-                  title={set.numbers.join(', ')} // Full numbers as tooltip
-                >
-                  {set.numbers.join(', ')}
-                </span>
-              </div>
+              <Form.Control
+                type="text"
+                value={formatEquation(set.numbers)} // Use formatEquation to handle formatting
+                onChange={(e) => handleEditPinnedSetNumbers(pinnedSets.length - 1 - idx, e.target.value)} // Adjust index for reversed order
+                placeholder="Enter numbers (e.g., 1+2-3)"
+                style={{
+                  marginBottom: '8px',
+                  background: 'transparent',
+                  border: `2px solid ${set.color}`, // Match border color to set color
+                }}
+                onFocus={(e) => (e.target.style.background = '#f8f9fa')} // Light gray background on focus
+                onBlur={(e) => (e.target.style.background = 'transparent')} // Reset background on blur
+              />
               <ResultsText median={set.results.median} mean={set.results.mean} mode={set.results.average} />
             </Alert>
           </div>
