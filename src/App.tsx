@@ -2,20 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { FaThumbtack, FaTrash } from 'react-icons/fa'; // Import the pin and trash icons
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type Results = {
-  average: string;
-  median: string;
-  mean: string;
+  average: number; // Changed from string to number
+  median: number;  // Changed from string to number
+  mean: number;    // Changed from string to number
 };
+
+type PinnedSet = {
+  numbers: number[];
+  color: string;
+  results: Results;
+  name: string; // Add name property
+};
+
+// Number formatter for consistent formatting
+const numberFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+// Component to render Median, Mean, and Mode
+const ResultsText: React.FC<{ median: number; mean: number; mode: number }> = ({ median, mean, mode }) => (
+  <div>
+    <p><strong>Median: </strong>{numberFormatter.format(median)}</p>
+    <p><strong>Mean: </strong>{numberFormatter.format(mean)}</p>
+    <p><strong>Mode: </strong>{numberFormatter.format(mode)}</p>
+  </div>
+);
 
 const App: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const [numbers, setNumbers] = useState<number[]>([]);
   const [results, setResults] = useState<Results | null>(null);
+  const [pinnedSets, setPinnedSets] = useState<PinnedSet[]>([]); // Use PinnedSet type
 
   // Load last entered expression from local storage on mount
   useEffect(() => {
@@ -73,11 +97,13 @@ const App: React.FC = () => {
     });
 
     const maxFrequency = Math.max(...Object.values(frequencyMap));
-    const mode = Object.keys(frequencyMap)
-      .filter((key) => frequencyMap[Number(key)] === maxFrequency)
-      .map(Number)
-      .sort((a, b) => a - b)
-      .join(', ');
+    const mode = parseFloat(
+      Object.keys(frequencyMap)
+        .filter((key) => frequencyMap[Number(key)] === maxFrequency)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .join(', ')
+    );
 
     let median;
     if (length % 2 === 0) {
@@ -87,9 +113,9 @@ const App: React.FC = () => {
     }
 
     setResults({
-      average: mode, // Replacing "average" with "mode"
-      median: median.toFixed(2),
-      mean: (nums.reduce((a, b) => a + b, 0) / length).toFixed(2),
+      average: mode, // Store as number
+      median: median,
+      mean: nums.reduce((a, b) => a + b, 0) / length,
     });
   };
 
@@ -108,12 +134,59 @@ const App: React.FC = () => {
     setResults(null);
   };
 
-  // Prepare data for the line chart
+  // Pin the current set of numbers and reset input
+  const handlePinNumbers = () => {
+    if (numbers.length > 0 && results) {
+      const newPinnedSet: PinnedSet = {
+        numbers,
+        color: getRandomColor(), // Assign a random color
+        results,
+        name: `Pinned Set ${pinnedSets.length + 1}`, // Default name
+      };
+      setPinnedSets([...pinnedSets, newPinnedSet]);
+      setInputValue('');
+      setNumbers([]);
+      setResults(null);
+    }
+  };
+
+  const handleEditPinnedSetName = (index: number, newName: string) => {
+    const updatedPinnedSets = [...pinnedSets];
+    updatedPinnedSets[index].name = newName;
+    setPinnedSets(updatedPinnedSets);
+  };
+
+  const handleDeletePinnedSet = (index: number) => {
+    if (window.confirm('Are you sure you want to delete this pinned set?')) {
+      const updatedPinnedSets = [...pinnedSets];
+      updatedPinnedSets.splice(index, 1);
+      setPinnedSets(updatedPinnedSets);
+    }
+  };
+
+  // Generate a random vibrant color
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  // Prepare data for the line chart, including pinned sets
   const chartData = {
     labels: numbers.map((_, index) => `Index ${index + 1}`),
     datasets: [
+      ...pinnedSets.map((set, idx) => ({
+        label: `Pinned Set ${idx + 1}`,
+        data: set.numbers,
+        fill: false,
+        borderColor: set.color, // Use color from PinnedSet
+        tension: 0.1,
+      })),
       {
-        label: 'Number Values',
+        label: 'Current Numbers',
         data: numbers,
         fill: false,
         borderColor: 'rgba(75, 192, 192, 1)',
@@ -139,9 +212,10 @@ const App: React.FC = () => {
         Clear
       </Button>
 
+      {/* Parsed Numbers */}
       <div className="mt-4">
         <h3>Parsed Numbers:</h3>
-        <div>
+        <div className="d-flex align-items-center flex-wrap">
           {numbers.map((num, index) => (
             <Badge
               key={index}
@@ -152,27 +226,92 @@ const App: React.FC = () => {
               {num}
             </Badge>
           ))}
+          {numbers.length > 0 && (
+            <Button
+              onClick={handlePinNumbers}
+              variant="light"
+              className="ml-2 mb-2 p-0"
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'black')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'gray')}
+            >
+              <FaThumbtack size={16} />
+            </Button>
+          )}
         </div>
       </div>
 
-      {results && (
-        <div className="mt-4">
-          <Alert variant="info">
-            <h4>Stats:</h4>
-            <p><strong>Median: </strong>{results.median}</p>
-            <p><strong>Mean: </strong>{results.mean}</p>
-            <p><strong>Mode: </strong>{results.average}</p>
-          </Alert>
-        </div>
-      )}
+      {/* Results Section */}
+      <div className="mt-4 d-flex flex-wrap" style={{ gap: '16px' }}> {/* Add gap for spacing */}
+        {/* Current working set */}
+        {results && (
+          <div>
+            <Alert variant="info">
+              <h4>Stats:</h4>
+              <ResultsText median={results.median} mean={results.mean} mode={results.average} />
+            </Alert>
+          </div>
+        )}
+
+        {/* Pinned sets */}
+        {[...pinnedSets].reverse().map((set, idx) => ( // Reverse the order for newest on the left
+          <div key={idx}>
+            <Alert variant="secondary" style={{ position: 'relative' }}> {/* Add relative positioning */}
+              <Button
+                variant="link"
+                onClick={() => handleDeletePinnedSet(pinnedSets.length - 1 - idx)} // Adjust index for reversed order
+                style={{
+                  color: 'red',
+                  padding: 0,
+                  position: 'absolute', // Position the button
+                  top: '8px', // Align to the top
+                  right: '8px', // Align to the right
+                }}
+              >
+                <FaTrash />
+              </Button>
+              <input
+                type="text"
+                value={set.name}
+                onChange={(e) => handleEditPinnedSetName(pinnedSets.length - 1 - idx, e.target.value)} // Adjust index for reversed order
+                placeholder={`Pinned Set ${pinnedSets.length - idx}`} // Default name as placeholder
+                style={{
+                  fontWeight: 'bold',
+                  color: '#6c757d',
+                  border: 'none',
+                  background: 'transparent',
+                  width: '100%',
+                  marginBottom: '8px',
+                  outline: 'none',
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', border: `1px solid ${set.color}`, padding: '8px', borderRadius: '4px' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    maxWidth: '160px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    marginLeft: '8px',
+                  }}
+                  title={set.numbers.join(', ')} // Full numbers as tooltip
+                >
+                  {set.numbers.join(', ')}
+                </span>
+              </div>
+              <ResultsText median={set.results.median} mean={set.results.mean} mode={set.results.average} />
+            </Alert>
+          </div>
+        ))}
+      </div>
 
       {/* Line Chart */}
-      {numbers.length > 0 && (
+      {numbers.length > 0 || pinnedSets.length > 0 ? (
         <div className="mt-5">
           <h3>Line Graph of Numbers</h3>
           <Line data={chartData} />
         </div>
-      )}
+      ) : null}
     </Container>
   );
 };
