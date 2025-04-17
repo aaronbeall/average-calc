@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -17,6 +17,19 @@ const App: React.FC = () => {
   const [numbers, setNumbers] = useState<number[]>([]);
   const [results, setResults] = useState<Results | null>(null);
 
+  // Load last entered expression from local storage on mount
+  useEffect(() => {
+    const savedExpression = localStorage.getItem('lastExpression');
+    if (savedExpression) {
+      setInputValue(savedExpression);
+      const parsedNumbers = parseEquation(savedExpression);
+      if (parsedNumbers.length > 0) {
+        setNumbers(parsedNumbers);
+        calculateStats(parsedNumbers);
+      }
+    }
+  }, []);
+
   // Handle real-time parsing and calculation
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -25,9 +38,11 @@ const App: React.FC = () => {
     if (value.trim() === '') {
       setNumbers([]);
       setResults(null);
+      localStorage.removeItem('lastExpression');
       return;
     }
 
+    localStorage.setItem('lastExpression', value); // Save expression to local storage
     const parsedNumbers = parseEquation(value);
     if (parsedNumbers.length > 0) {
       setNumbers(parsedNumbers);
