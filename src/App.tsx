@@ -127,25 +127,25 @@ const App: React.FC = () => {
 
   // Move pinned set left
   const handleMovePinnedSetLeft = (index: number) => {
-    if (index >= pinnedSets.length - 1) return;
-    const updated = [...pinnedSets];
-    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-    setPinnedSets(updated);
+  if (index >= pinnedSets.length - 1) return;
+  const updated = [...pinnedSets];
+  [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+  updatePinnedSets(updated);
   };
 
   // Move pinned set right
   const handleMovePinnedSetRight = (index: number) => {
-    if (index <= 0) return;
-    const updated = [...pinnedSets];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    setPinnedSets(updated);
+  if (index <= 0) return;
+  const updated = [...pinnedSets];
+  [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+  updatePinnedSets(updated);
   };
 
   // Change color of pinned set
   const handleChangePinnedSetColor = (index: number) => {
-    const updated = [...pinnedSets];
-    updated[index].color = getRandomColor();
-    setPinnedSets(updated);
+  const updated = [...pinnedSets];
+  updated[index].color = getRandomColor();
+  updatePinnedSets(updated);
   };
 
   // Handle real-time parsing and calculation
