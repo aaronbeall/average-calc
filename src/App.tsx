@@ -420,11 +420,7 @@ const App: React.FC = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu align="end">
                   <Dropdown.Item
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to delete this pinned set?')) {
-                        handleDeletePinnedSet(pinnedSets.length - 1 - idx);
-                      }
-                    }}
+                    onClick={() => handleDeletePinnedSet(pinnedSets.length - 1 - idx)}
                   >
                     <FaTrash style={{ marginRight: 8 }} /> Delete
                   </Dropdown.Item>
