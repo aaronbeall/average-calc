@@ -13,9 +13,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 type Results = {
   total: number;
-  average: number; // Changed from string to number
-  median: number;  // Changed from string to number
-  mean: number;    // Changed from string to number
+  median: number;
+  mean: number;
+  min: number;
+  max: number;
 };
 
 type PinnedSet = {
@@ -32,68 +33,92 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
 });
 
 // Component to render Total, Median, Mean, and Mode
-const ResultsText: React.FC<{ total: number; median: number; mean: number; mode: number }> = ({ total, median, mean, mode }) => (
+const ResultsText: React.FC<{ total: number; median: number; mean: number; min: number; max: number }> = ({ total, median, mean, min, max }) => (
   <div style={{
     background: 'rgba(255,255,255,0.85)',
-    borderRadius: '6px',
+    borderRadius: '5px',
     boxShadow: 'none',
-    padding: '10px 12px',
+    padding: '7px 8px',
     margin: '0',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
-    minWidth: '180px',
-    maxWidth: '320px',
+    gap: '0',
+    minWidth: '150px',
+    maxWidth: '260px',
   }}>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontWeight: 500, color: '#2d7d46', letterSpacing: '0.01em' }}>Total</span>
-        <span style={{
-          color: total >= 0 ? '#2d7d46' : '#b00020',
-          background: total >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
-          borderRadius: '4px',
-          padding: '2px 8px',
-          fontWeight: 600,
-          fontSize: '1em',
-          minWidth: '48px',
-          textAlign: 'right',
-        }}>{numberFormatter.format(total)}</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontWeight: 500, color: '#3a3a3a', letterSpacing: '0.01em' }}>Median</span>
+    {/* Total - most important */}
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      marginBottom: '6px',
+      paddingBottom: '2px',
+      borderBottom: '1px solid #e0e0e0',
+    }}>
+  <span style={{ fontWeight: 600, color: '#3a3a3a', fontSize: '1em', letterSpacing: '0.01em' }}>Total</span>
+      <span style={{
+        color: total >= 0 ? '#2d7d46' : '#b00020',
+        background: total >= 0 ? 'rgba(45,125,70,0.10)' : 'rgba(176,0,32,0.10)',
+        borderRadius: '3px',
+        padding: '2px 8px',
+        fontWeight: 700,
+        fontSize: '1em',
+        minWidth: '44px',
+        textAlign: 'right',
+      }}>{numberFormatter.format(total)}</span>
+    </div>
+    {/* Median & Mean - related group */}
+    <div style={{ display: 'flex', gap: '8px', margin: '6px 0', justifyContent: 'space-between' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+        <span style={{ fontWeight: 500, color: '#3a3a3a', fontSize: '0.95em', textAlign: 'left', flex: 1 }}>Median</span>
         <span style={{
           color: median >= 0 ? '#2d7d46' : '#b00020',
           background: median >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
-          borderRadius: '4px',
-          padding: '2px 8px',
+          borderRadius: '3px',
+          padding: '1px 6px',
           fontWeight: 600,
-          minWidth: '48px',
+          minWidth: '36px',
           textAlign: 'right',
         }}>{numberFormatter.format(median)}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontWeight: 500, color: '#3a3a3a', letterSpacing: '0.01em' }}>Mean</span>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+        <span style={{ fontWeight: 500, color: '#3a3a3a', fontSize: '0.95em', textAlign: 'left', flex: 1 }}>Mean</span>
         <span style={{
           color: mean >= 0 ? '#2d7d46' : '#b00020',
           background: mean >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
-          borderRadius: '4px',
-          padding: '2px 8px',
+          borderRadius: '3px',
+          padding: '1px 6px',
           fontWeight: 600,
-          minWidth: '48px',
+          minWidth: '36px',
           textAlign: 'right',
         }}>{numberFormatter.format(mean)}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontWeight: 500, color: '#3a3a3a', letterSpacing: '0.01em' }}>Mode</span>
+    </div>
+    {/* Divider for hierarchy */}
+  <div style={{ borderBottom: '1px solid #e0e0e0', margin: '2px 0 6px 0' }} />
+    {/* Min & Max - related group */}
+    <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+        <span style={{ fontWeight: 500, color: '#3a3a3a', fontSize: '0.95em', textAlign: 'left', flex: 1 }}>Min</span>
         <span style={{
-          color: mode >= 0 ? '#2d7d46' : '#b00020',
-          background: mode >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
-          borderRadius: '4px',
-          padding: '2px 8px',
+          color: min >= 0 ? '#2d7d46' : '#b00020',
+          background: min >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
+          borderRadius: '3px',
+          padding: '1px 6px',
           fontWeight: 600,
-          minWidth: '48px',
+          minWidth: '36px',
           textAlign: 'right',
-        }}>{numberFormatter.format(mode)}</span>
+        }}>{numberFormatter.format(min)}</span>
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+        <span style={{ fontWeight: 500, color: '#3a3a3a', fontSize: '0.95em', textAlign: 'left', flex: 1 }}>Max</span>
+        <span style={{
+          color: max >= 0 ? '#2d7d46' : '#b00020',
+          background: max >= 0 ? 'rgba(45,125,70,0.08)' : 'rgba(176,0,32,0.08)',
+          borderRadius: '3px',
+          padding: '1px 6px',
+          fontWeight: 600,
+          minWidth: '36px',
+          textAlign: 'right',
+        }}>{numberFormatter.format(max)}</span>
       </div>
     </div>
   </div>
@@ -180,25 +205,13 @@ const App: React.FC = () => {
     return matches ? matches.map((match) => parseFloat(match)) : [];
   };
 
-  // Calculate mode, median, mean, and total
+  // Calculate min, max, median, mean, and total
   const calculateStats = (nums: number[]) => {
     const sortedNumbers = [...nums].sort((a, b) => a - b);
     const length = sortedNumbers.length;
     const total = nums.reduce((a, b) => a + b, 0);
-
-    const frequencyMap: Record<number, number> = {};
-    nums.forEach((num) => {
-      frequencyMap[num] = (frequencyMap[num] || 0) + 1;
-    });
-
-    const maxFrequency = Math.max(...Object.values(frequencyMap));
-    const mode = parseFloat(
-      Object.keys(frequencyMap)
-        .filter((key) => frequencyMap[Number(key)] === maxFrequency)
-        .map(Number)
-        .sort((a, b) => a - b)
-        .join(', ')
-    );
+    const min = length > 0 ? sortedNumbers[0] : 0;
+    const max = length > 0 ? sortedNumbers[length - 1] : 0;
 
     let median;
     if (length % 2 === 0) {
@@ -209,9 +222,10 @@ const App: React.FC = () => {
 
     setResults({
       total,
-      average: mode, // Store as number
-      median: median,
+      median,
       mean: total / length,
+      min,
+      max,
     });
   };
 
@@ -272,37 +286,23 @@ const App: React.FC = () => {
     if (parsedNumbers.length > 0) {
       const sortedNumbers = [...parsedNumbers].sort((a, b) => a - b);
       const length = sortedNumbers.length;
-
-      const frequencyMap: Record<number, number> = {};
-      parsedNumbers.forEach((num) => {
-        frequencyMap[num] = (frequencyMap[num] || 0) + 1;
-      });
-
-      const maxFrequency = Math.max(...Object.values(frequencyMap));
-      const mode = parseFloat(
-        Object.keys(frequencyMap)
-          .filter((key) => frequencyMap[Number(key)] === maxFrequency)
-          .map(Number)
-          .sort((a, b) => a - b)
-          .join(', ')
-      );
-
       let median;
       if (length % 2 === 0) {
         median = (sortedNumbers[length / 2 - 1] + sortedNumbers[length / 2]) / 2;
       } else {
         median = sortedNumbers[Math.floor(length / 2)];
       }
-
-      updatedPinnedSets[setIndex].numbers = parsedNumbers;
       const total = parsedNumbers.reduce((a, b) => a + b, 0);
+      const min = length > 0 ? sortedNumbers[0] : 0;
+      const max = length > 0 ? sortedNumbers[length - 1] : 0;
+      updatedPinnedSets[setIndex].numbers = parsedNumbers;
       updatedPinnedSets[setIndex].results = {
         total,
-        average: mode,
-        median: median,
-        mean: total / length,
+        median,
+        mean: length > 0 ? total / length : 0,
+        min,
+        max,
       };
-
       updatePinnedSets(updatedPinnedSets); // Use helper function
     }
   };
@@ -396,7 +396,7 @@ const App: React.FC = () => {
           <div>
             <Alert variant="info">
               <h4>Stats:</h4>
-              <ResultsText total={results.total} median={results.median} mean={results.mean} mode={results.average} />
+              <ResultsText total={results.total} median={results.median} mean={results.mean} min={results.min} max={results.max} />
             </Alert>
           </div>
         )}
@@ -465,7 +465,7 @@ const App: React.FC = () => {
                 onFocus={(e) => (e.target.style.background = '#f8f9fa')}
                 onBlur={(e) => (e.target.style.background = 'transparent')}
               />
-              <ResultsText total={set.results.total} median={set.results.median} mean={set.results.mean} mode={set.results.average} />
+              <ResultsText total={set.results.total} median={set.results.median} mean={set.results.mean} min={set.results.min} max={set.results.max} />
             </Alert>
           </div>
         ))}
