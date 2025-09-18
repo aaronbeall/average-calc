@@ -203,7 +203,8 @@ const App: React.FC = () => {
 
   // Parse equation into an array of numbers
   const parseEquation = (equation: string): number[] => {
-    const sanitizedEquation = equation.replace(/\s+/g, '');
+    // Remove spaces and commas
+    const sanitizedEquation = equation.replace(/[\s,]+/g, '');
     const regex = /([+-]?\d+(\.\d+)?)/g;
     const matches = sanitizedEquation.match(regex);
 
