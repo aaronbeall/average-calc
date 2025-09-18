@@ -1,10 +1,11 @@
+
 import tinycolor from 'tinycolor2';
 import React, { useState, useEffect } from 'react';
+import logo from '../public/logo.svg';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaThumbtack } from 'react-icons/fa';
-import { FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea } from 'react-icons/fa';
+import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
 
 
@@ -63,6 +64,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
         fontSize: '1em',
         minWidth: '44px',
         textAlign: 'right',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
       }}>{numberFormatter.format(total)}</span>
     </div>
     {/* Median & Mean - related group */}
@@ -77,6 +79,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
           fontWeight: 600,
           minWidth: '36px',
           textAlign: 'right',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}>{numberFormatter.format(median)}</span>
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
@@ -89,6 +92,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
           fontWeight: 600,
           minWidth: '36px',
           textAlign: 'right',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}>{numberFormatter.format(mean)}</span>
       </div>
     </div>
@@ -106,6 +110,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
           fontWeight: 600,
           minWidth: '36px',
           textAlign: 'right',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}>{numberFormatter.format(min)}</span>
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
@@ -118,6 +123,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
           fontWeight: 600,
           minWidth: '36px',
           textAlign: 'right',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}>{numberFormatter.format(max)}</span>
       </div>
     </div>
@@ -352,76 +358,108 @@ const App: React.FC = () => {
   const totalsStats = calculateStats(allSets.flat());
 
   return (
-    <Container className="mt-5" fluid>
-      <h1>Math Expression Stats</h1>
-      <Form.Group controlId="formBasicEquation">
-        <Form.Label>Enter a math equation (+ and - only):</Form.Label>
-        <Form.Control
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder="e.g., 1+2-3+4"
-        />
-      </Form.Group>
-
-      <Button onClick={handleClear} variant="danger" className="mt-3">
-        Clear
-      </Button>
-
-      {/* Parsed Numbers */}
-      <div className="mt-4">
-        <h3>Parsed Numbers:</h3>
-        <div className="d-flex align-items-center flex-wrap">
-          {numbers.map((num, index) => (
-            <Badge
-              key={index}
-              className="mr-2 mb-2"
-              onClick={() => handleRemoveNumber(index)}
-              style={{ cursor: 'pointer' }}
-            >
-              {num}
-            </Badge>
-          ))}
-          {numbers.length > 0 && (
-            <Button
-              onClick={handlePinNumbers}
-              variant="light"
-              className="ml-2 mb-2 p-0"
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'black')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'gray')}
-            >
-              <FaThumbtack size={16} />
-            </Button>
-          )}
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #f8fafc 0%, #e3e9f3 100%)', padding: 0, margin: 0, width: '100vw', overflowX: 'hidden' }}>
+  <div style={{ width: '100%', padding: '32px 0 48px 0', boxSizing: 'border-box' }}>
+        {/* Header */}
+        <div style={{
+          maxWidth: 1400,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          paddingLeft: '4vw',
+          paddingRight: '4vw',
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 18,
+          marginBottom: 32
+        }}>
+          <img src={logo} alt="Logo" style={{ height: 48, width: 48, marginRight: 10, flexShrink: 0 }} />
+          <h1 style={{
+            fontSize: '2.6rem',
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            color: '#1e293b',
+            margin: 0,
+            textShadow: '0 2px 8px rgba(30,41,59,0.04)'
+          }}>Number <span style={{ color: '#3b82f6', fontWeight: 900 }}>Stats</span></h1>
         </div>
-      </div>
 
-      {/* Results Section */}
-      <div className="mt-4 d-flex flex-wrap" style={{ gap: '16px' }}> {/* Add gap for spacing */}
-        {/* Current working set */}
-        {results && (
-          <div>
-            <Alert variant="info">
-              <h4>Stats:</h4>
-              <ResultsText total={results.total} median={results.median} mean={results.mean} min={results.min} max={results.max} />
-            </Alert>
+  <div style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 32px rgba(30,41,59,0.07)', padding: '32px 4vw 24px 4vw', marginBottom: 32, maxWidth: 1400, marginLeft: 'auto', marginRight: 'auto' }}>
+          {/* Input Section */}
+          <Form.Group controlId="formBasicEquation" style={{ marginBottom: 24 }}>
+            <Form.Label style={{ fontWeight: 700, fontSize: '1.15em', color: '#334155', marginBottom: 8 }}>Enter a math equation <span style={{ color: '#3b82f6' }}>(+ and - only)</span>:</Form.Label>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <Form.Control
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="e.g., 1+2-3+4"
+                style={{ fontSize: '1.15em', padding: '10px 16px', borderRadius: 8, border: '1.5px solid #e0e7ef', background: '#f8fafc', color: '#1e293b', fontWeight: 500, flex: 1 }}
+              />
+            </div>
+          </Form.Group>
+
+          {/* Parsed Numbers Section */}
+          <div style={{ marginTop: 8, marginBottom: 8 }}>
+            <div style={{ fontWeight: 600, color: '#64748b', fontSize: '1.08em', marginBottom: 6 }}>Parsed Numbers</div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              {numbers.map((num, index) => (
+                <ParsedNumberBadge
+                  key={index}
+                  num={num}
+                  onRemove={() => handleRemoveNumber(index)}
+                />
+              ))}
+              {/* Pin button moved to Current Set tile */}
+            </div>
           </div>
-        )}
+        </div>
 
-        {/* Pinned sets */}
-        {[...pinnedSets].reverse().map((set, idx) => (
-          <div key={idx}>
-            <Alert
-              variant="secondary"
-              style={{
-                position: 'relative',
-                paddingLeft: '16px',
-                borderLeft: `12px solid ${set.color}`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                background: '#f8f9fa',
-              }}
-            >
-              <Dropdown style={{ position: 'absolute', top: 8, right: 8 }}>
+        {/* Results, pinned sets, totals, and chart will be modernized in the next steps */}
+        {/* Results & Sets Section */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '32px',
+          marginTop: 32,
+          marginBottom: 32,
+          width: '100%',
+          maxWidth: 1400,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          boxSizing: 'border-box',
+        }}>
+          {/* Current working set */}
+          {results && (
+            <div style={{ background: '#f1f5f9', borderRadius: 14, boxShadow: '0 2px 8px rgba(30,41,59,0.04)', padding: '22px 20px 18px 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 8 }}>
+                <span style={{ fontWeight: 700, color: '#2563eb', fontSize: '1.13em', letterSpacing: '-0.01em', flex: 1 }}>Current Set</span>
+                <button
+                  onClick={handlePinNumbers}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    marginLeft: 8,
+                    color: '#2563eb',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: 20,
+                  }}
+                  title="Pin this set"
+                >
+                  <FaThumbtack size={20} />
+                </button>
+              </div>
+              <ResultsText total={results.total} median={results.median} mean={results.mean} min={results.min} max={results.max} />
+            </div>
+          )}
+
+          {/* Pinned sets */}
+          {[...pinnedSets].reverse().map((set, idx) => (
+            <div key={idx} style={{ background: '#f8fafc', borderRadius: 14, boxShadow: '0 2px 8px rgba(30,41,59,0.04)', padding: '22px 20px 18px 20px', minWidth: 0, position: 'relative', borderLeft: `8px solid ${set.color}` }}>
+              <Dropdown style={{ position: 'absolute', top: 12, right: 12 }}>
                 <Dropdown.Toggle variant="link" style={{ color: '#888', padding: 0 }}>
                   <FaCog />
                 </Dropdown.Toggle>
@@ -445,90 +483,161 @@ const App: React.FC = () => {
               <input
                 type="text"
                 value={set.name}
-                onChange={(e) => handleEditPinnedSetName(pinnedSets.length - 1 - idx, e.target.value)} // Adjust index for reversed order
-                placeholder={`Pinned Set ${pinnedSets.length - idx}`} // Default name as placeholder
+                onChange={(e) => handleEditPinnedSetName(pinnedSets.length - 1 - idx, e.target.value)}
+                placeholder={`Pinned Set ${pinnedSets.length - idx}`}
                 style={{
                   fontWeight: 'bold',
-                  color: '#6c757d',
+                  color: '#64748b',
                   border: 'none',
                   background: 'transparent',
                   width: '100%',
                   marginBottom: '8px',
                   outline: 'none',
+                  fontSize: '1.08em',
                 }}
-                onFocus={(e) => (e.target.style.background = '#f8f9fa')} // Light gray background on focus
-                onBlur={(e) => (e.target.style.background = 'transparent')} // Reset background on blur
+                onFocus={(e) => (e.target.style.background = '#f1f5f9')}
+                onBlur={(e) => (e.target.style.background = 'transparent')}
               />
               <Form.Control
                 type="text"
-                value={formatEquation(set.numbers)} // Use formatEquation to handle formatting
-                onChange={(e) => handleEditPinnedSetNumbers(pinnedSets.length - 1 - idx, e.target.value)} // Adjust index for reversed order
+                value={formatEquation(set.numbers)}
+                onChange={(e) => handleEditPinnedSetNumbers(pinnedSets.length - 1 - idx, e.target.value)}
                 placeholder="Enter numbers (e.g., 1+2-3)"
                 style={{
                   marginBottom: '8px',
-                  background: 'transparent',
-                  border: '1px solid #ced4da', // Default border
+                  background: '#f8fafc',
+                  border: '1.5px solid #e0e7ef',
+                  borderRadius: 8,
+                  fontWeight: 500,
+                  color: '#334155',
+                  fontSize: '1.08em',
                 }}
-                onFocus={(e) => (e.target.style.background = '#f8f9fa')}
-                onBlur={(e) => (e.target.style.background = 'transparent')}
+                onFocus={(e) => (e.target.style.background = '#f1f5f9')}
+                onBlur={(e) => (e.target.style.background = '#f8fafc')}
               />
               <ResultsText total={set.results.total} median={set.results.median} mean={set.results.mean} min={set.results.min} max={set.results.max} />
-            </Alert>
-          </div>
-        ))}
+            </div>
+          ))}
 
-        {/* Totals card across all sets */}
-        {totalsStats && (
-          <div>
-            <Alert
-              variant="success"
-              style={{
-                // borderLeft removed
-                background: 'linear-gradient(90deg, #e8f5e9 60%, #f8fff8 100%)',
-                color: '#1e824c',
-                fontWeight: 600,
-                boxShadow: '0 2px 8px rgba(30,130,76,0.07)',
-                minWidth: 0,
-                marginBottom: 0,
-              }}
-            >
-              <div style={{ fontSize: '1.08em', fontWeight: 700, marginBottom: 4, color: '#1e824c' }}>Totals (All Sets)</div>
+          {/* Totals card across all sets */}
+          {totalsStats && (
+            <div style={{ background: 'linear-gradient(90deg, #e8f5e9 60%, #f8fff8 100%)', borderRadius: 14, boxShadow: '0 2px 8px rgba(30,130,76,0.07)', padding: '22px 20px 18px 20px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <div style={{ fontSize: '1.13em', fontWeight: 700, marginBottom: 8, color: '#1e824c', letterSpacing: '-0.01em' }}>Totals (All Sets)</div>
               <ResultsText total={totalsStats.total} median={totalsStats.median} mean={totalsStats.mean} min={totalsStats.min} max={totalsStats.max} />
-            </Alert>
+            </div>
+          )}
+        </div>
+
+        {/* Chart Section */}
+        {(numbers.length > 0 || pinnedSets.length > 0) && (
+          <div style={{
+            background: '#fff',
+            borderRadius: 14,
+            boxShadow: '0 4px 32px rgba(30,41,59,0.07)',
+            padding: '32px 4vw 28px 4vw',
+            marginTop: 24,
+            marginBottom: 0,
+            width: '100%',
+            maxWidth: 1400,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            boxSizing: 'border-box',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
+              <div style={{ fontWeight: 700, color: '#334155', fontSize: '1.18em', letterSpacing: '-0.01em', flex: 1 }}>Line Graph of Numbers</div>
+              <button
+                type="button"
+                style={{
+                  border: '1.5px solid #e0e7ef',
+                  borderRadius: 8,
+                  background: cumulative ? '#e0e7ef' : '#f8fafc',
+                  color: '#2563eb',
+                  padding: '7px 18px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '1.08em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'background 0.2s',
+                  boxShadow: cumulative ? '0 2px 8px rgba(59,130,246,0.07)' : 'none',
+                }}
+                onClick={() => setCumulative(c => !c)}
+                title={cumulative ? 'Show serial (raw) data' : 'Show cumulative data'}
+              >
+                {cumulative ? <FaChartArea style={{ marginRight: 7 }} /> : <FaChartLine style={{ marginRight: 7 }} />}
+                {cumulative ? 'Cumulative' : 'Serial'}
+              </button>
+            </div>
+            <div style={{ width: '100%', minHeight: 320, display: 'flex', alignItems: 'stretch' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Line data={getChartData()} options={{ responsive: true, maintainAspectRatio: false }} style={{ width: '100%', height: '320px' }} />
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Line Chart */}
-      {numbers.length > 0 || pinnedSets.length > 0 ? (
-        <div className="mt-5">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
-            <h3 style={{ margin: 0, flex: 1 }}>Line Graph of Numbers</h3>
-            <button
-              type="button"
-              style={{
-                border: '1px solid #bbb',
-                borderRadius: 4,
-                background: cumulative ? '#e0e0e0' : '#fff',
-                color: '#333',
-                padding: '4px 12px',
-                cursor: 'pointer',
-                fontWeight: 500,
-                fontSize: '1.1em',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'background 0.2s',
-              }}
-              onClick={() => setCumulative(c => !c)}
-              title={cumulative ? 'Show serial (raw) data' : 'Show cumulative data'}
-            >
-              {cumulative ? <FaChartArea style={{ marginRight: 4 }} /> : <FaChartLine style={{ marginRight: 4 }} />}
-            </button>
-          </div>
-          <Line data={getChartData()} />
-        </div>
-      ) : null}
-    </Container>
+      {/* (Old duplicated results/cards/chart UI removed) */}
+  </div>
+  );
+};
+
+// ParsedNumberBadge: extracted for hover state with hooks
+const ParsedNumberBadge: React.FC<{ num: number; onRemove: () => void }> = ({ num, onRemove }) => {
+  const [hovered, setHovered] = React.useState(false);
+  // Determine color by value
+  let bgColor = 'bg-secondary';
+  let textColor = '#fff';
+  if (num > 0) bgColor = 'bg-success';
+  else if (num < 0) bgColor = 'bg-danger';
+  else bgColor = 'bg-secondary';
+
+  return (
+    <span
+      onClick={onRemove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`badge ${bgColor}`}
+      style={{
+        cursor: 'pointer',
+        fontWeight: 700,
+        fontSize: '1.08em',
+        padding: '8px 16px',
+        borderRadius: 8,
+        marginBottom: 4,
+        boxShadow: '0 1px 4px rgba(30,41,59,0.08)',
+        letterSpacing: '0.01em',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        position: 'relative',
+        color: textColor,
+        overflow: 'hidden',
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      title="Remove this number"
+    >
+      <span style={{ opacity: hovered ? 0.25 : 1, transition: 'opacity 0.18s' }}>{num}</span>
+      {/* Ghost overlay and icon on hover */}
+      {hovered && (
+        <span style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.10)',
+          color: '#fff',
+          fontSize: 18,
+          opacity: 1,
+          transition: 'opacity 0.18s',
+          pointerEvents: 'none',
+        }}>
+          <FaTrash style={{ opacity: 0.85 }} />
+        </span>
+      )}
+    </span>
   );
 };
 
