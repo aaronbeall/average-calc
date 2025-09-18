@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaThumbtack } from 'react-icons/fa'; // Import the pin and trash icons
-import { FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaThumbtack } from 'react-icons/fa';
+import { FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
 
 
@@ -323,6 +323,23 @@ const App: React.FC = () => {
     return numbers.map((num, i) => (i === 0 ? num : (num >= 0 ? `+${num}` : `${num}`))).join(' ');
   };
 
+    const [cumulative, setCumulative] = React.useState(false);
+
+  // Helper to get chart data in serial or cumulative mode
+  const getChartData = () => {
+    if (!cumulative) return chartData;
+    // Cumulative: sum up each dataset
+    const cumulate = (arr: number[]) => arr.reduce((acc, val, i) => {
+      acc.push((acc[i - 1] || 0) + val);
+      return acc;
+    }, [] as number[]);
+    const newDatasets = chartData.datasets.map(ds => ({
+      ...ds,
+      data: cumulate(ds.data as number[]),
+    }));
+    return { ...chartData, datasets: newDatasets };
+  };
+
   // Prepare data for the line chart, including pinned sets
   const chartData = {
     labels: numbers.map((_, index) => `Index ${index + 1}`),
@@ -474,8 +491,30 @@ const App: React.FC = () => {
       {/* Line Chart */}
       {numbers.length > 0 || pinnedSets.length > 0 ? (
         <div className="mt-5">
-          <h3>Line Graph of Numbers</h3>
-          <Line data={chartData} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+            <h3 style={{ margin: 0, flex: 1 }}>Line Graph of Numbers</h3>
+            <button
+              type="button"
+              style={{
+                border: '1px solid #bbb',
+                borderRadius: 4,
+                background: cumulative ? '#e0e0e0' : '#fff',
+                color: '#333',
+                padding: '4px 12px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: '1.1em',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'background 0.2s',
+              }}
+              onClick={() => setCumulative(c => !c)}
+              title={cumulative ? 'Show serial (raw) data' : 'Show cumulative data'}
+            >
+              {cumulative ? <FaChartArea style={{ marginRight: 4 }} /> : <FaChartLine style={{ marginRight: 4 }} />}
+            </button>
+          </div>
+          <Line data={getChartData()} />
         </div>
       ) : null}
     </Container>
