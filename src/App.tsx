@@ -5,7 +5,7 @@ import logo from '../public/logo.svg';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea } from 'react-icons/fa';
+import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea, FaSort, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
 
 
@@ -133,6 +133,7 @@ const ResultsText: React.FC<{ total: number; median: number; mean: number; min: 
 const App: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const [numbers, setNumbers] = useState<number[]>([]);
+  const [sortMode, setSortMode] = useState<'original' | 'asc' | 'desc'>('original');
   const [results, setResults] = useState<Results | null>(null);
   const [pinnedSets, setPinnedSets] = useState<PinnedSet[]>([]); // Use PinnedSet type
 
@@ -192,11 +193,10 @@ const App: React.FC = () => {
 
     localStorage.setItem('lastExpression', value); // Save expression to local storage
     const parsedNumbers = parseEquation(value);
+    setNumbers(parsedNumbers);
     if (parsedNumbers.length > 0) {
-      setNumbers(parsedNumbers);
       updateResults(parsedNumbers);
     } else {
-      setNumbers([]);
       setResults(null);
     }
   };
@@ -239,12 +239,27 @@ const App: React.FC = () => {
     };
   };
 
+  // Helper to get sorted numbers for display
+  const getSortedNumbers = (nums: number[], mode: 'original' | 'asc' | 'desc') => {
+    if (mode === 'asc') return [...nums].sort((a, b) => a - b);
+    if (mode === 'desc') return [...nums].sort((a, b) => b - a);
+    return nums;
+  };
+
   // Remove a number from the list and recalculate stats
   const handleRemoveNumber = (index: number) => {
-    const updatedNumbers = [...numbers];
-    updatedNumbers.splice(index, 1);
-    setNumbers(updatedNumbers);
-    updateResults(updatedNumbers);
+    // Remove from the unsorted numbers (input order)
+    const unsorted = [...numbers];
+    // To remove the correct number, we need to know which number is being displayed at this index in the sorted view
+    const sortedNumbers = getSortedNumbers(numbers, sortMode);
+    const numToRemove = sortedNumbers[index];
+    // Remove the first occurrence of numToRemove from the unsorted numbers
+    const removeIdx = unsorted.indexOf(numToRemove);
+    if (removeIdx !== -1) {
+      unsorted.splice(removeIdx, 1);
+      setNumbers(unsorted);
+      updateResults(unsorted);
+    }
   };
 
   // Clear input and results
@@ -402,9 +417,45 @@ const App: React.FC = () => {
 
           {/* Parsed Numbers Section */}
           <div style={{ marginTop: 8, marginBottom: 8 }}>
-            <div style={{ fontWeight: 600, color: '#64748b', fontSize: '1.08em', marginBottom: 6 }}>Parsed Numbers</div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontWeight: 600, color: '#64748b', fontSize: '1.08em' }}>Parsed Numbers</span>
+              <button
+                type="button"
+                onClick={() => {
+                  let nextMode: 'original' | 'asc' | 'desc';
+                  if (sortMode === 'original') nextMode = 'asc';
+                  else if (sortMode === 'asc') nextMode = 'desc';
+                  else nextMode = 'original';
+                  setSortMode(nextMode);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#2563eb',
+                  fontSize: 20,
+                  cursor: 'pointer',
+                  marginLeft: 10,
+                  padding: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'color 0.15s',
+                }}
+                title={
+                  sortMode === 'original'
+                    ? 'Sort ascending'
+                    : sortMode === 'asc'
+                    ? 'Sort descending'
+                    : 'Original order'
+                }
+                aria-label="Toggle sort order"
+              >
+                {sortMode === 'original' && <FaSort style={{ color: '#64748b' }} />}
+                {sortMode === 'asc' && <FaSortAmountUp style={{ color: '#2563eb' }} />}
+                {sortMode === 'desc' && <FaSortAmountDown style={{ color: '#2563eb' }} />}
+              </button>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-              {numbers.map((num, index) => (
+              {getSortedNumbers(numbers, sortMode).map((num, index) => (
                 <ParsedNumberBadge
                   key={index}
                   num={num}
