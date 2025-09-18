@@ -3,14 +3,14 @@ import tinycolor from 'tinycolor2';
 import React, { useState, useEffect } from 'react';
 import logo from '../public/logo.svg';
 import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea, FaSort, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
+import { Line, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea, FaChartBar, FaSort, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
 
 
 // Register ChartJS components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 type Results = {
   total: number;
@@ -136,6 +136,7 @@ const App: React.FC = () => {
   const [sortMode, setSortMode] = useState<'original' | 'asc' | 'desc'>('original');
   const [results, setResults] = useState<Results | null>(null);
   const [pinnedSets, setPinnedSets] = useState<PinnedSet[]>([]); // Use PinnedSet type
+  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
   // Load last entered expression from local storage on mount
   useEffect(() => {
@@ -333,15 +334,16 @@ const App: React.FC = () => {
 
   const [cumulative, setCumulative] = React.useState(false);
 
-  // Prepare data for the line chart, including pinned sets
+  // Prepare data for the chart, including pinned sets
   const chartData = {
     labels: numbers.map((_, index) => `Index ${index + 1}`),
     datasets: [
       ...pinnedSets.map((set) => ({
-        label: set.name, // Use the pinned set title name
+        label: set.name,
         data: set.numbers,
         fill: false,
-        borderColor: set.color, // Use color from PinnedSet
+        borderColor: set.color,
+        backgroundColor: set.color,
         tension: 0.1,
       })),
       {
@@ -349,6 +351,7 @@ const App: React.FC = () => {
         data: numbers,
         fill: false,
         borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.1,
       },
     ],
@@ -596,33 +599,60 @@ const App: React.FC = () => {
             boxSizing: 'border-box',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18 }}>
-              <div style={{ fontWeight: 700, color: '#334155', fontSize: '1.18em', letterSpacing: '-0.01em', flex: 1 }}>Line Graph of Numbers</div>
-              <button
-                type="button"
-                style={{
-                  border: '1.5px solid #e0e7ef',
-                  borderRadius: 8,
-                  background: cumulative ? '#e0e7ef' : '#f8fafc',
-                  color: '#2563eb',
-                  padding: '7px 18px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '1.08em',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'background 0.2s',
-                  boxShadow: cumulative ? '0 2px 8px rgba(59,130,246,0.07)' : 'none',
-                }}
-                onClick={() => setCumulative(c => !c)}
-                title={cumulative ? 'Show serial (raw) data' : 'Show cumulative data'}
-              >
-                {cumulative ? <FaChartArea style={{ marginRight: 7 }} /> : <FaChartLine style={{ marginRight: 7 }} />}
-                {cumulative ? 'Cumulative' : 'Serial'}
-              </button>
+              <div style={{ fontWeight: 700, color: '#334155', fontSize: '1.18em', letterSpacing: '-0.01em', flex: 1 }}>Graph of Numbers</div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  style={{
+                    border: '1.5px solid #e0e7ef',
+                    borderRadius: 8,
+                    background: '#f8fafc',
+                    color: '#2563eb',
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '1.08em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'background 0.2s',
+                  }}
+                  onClick={() => setChartType(chartType === 'line' ? 'bar' : 'line')}
+                  title={chartType === 'line' ? 'Switch to bar chart' : 'Switch to line chart'}
+                >
+                  {chartType === 'line' ? <FaChartLine style={{ marginRight: 7 }} /> : <FaChartBar style={{ marginRight: 7 }} />}
+                  {chartType === 'line' ? 'Line' : 'Bar'}
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    border: '1.5px solid #e0e7ef',
+                    borderRadius: 8,
+                    background: cumulative ? '#e0e7ef' : '#f8fafc',
+                    color: '#2563eb',
+                    padding: '7px 14px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '1.08em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'background 0.2s',
+                    boxShadow: cumulative ? '0 2px 8px rgba(59,130,246,0.07)' : 'none',
+                  }}
+                  onClick={() => setCumulative(c => !c)}
+                  title={cumulative ? 'Show serial (raw) data' : 'Show cumulative data'}
+                >
+                  <FaSortAmountUp style={{ marginRight: 7, opacity: cumulative ? 1 : 0.4 }} />
+                  {cumulative ? 'Cumulative' : 'Serial'}
+                </button>
+              </div>
             </div>
             <div style={{ width: '100%', minHeight: 320, display: 'flex', alignItems: 'stretch' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Line data={getChartData()} options={{ responsive: true, maintainAspectRatio: false }} style={{ width: '100%', height: '320px' }} />
+                {chartType === 'line' ? (
+                  <Line data={getChartData()} options={{ responsive: true, maintainAspectRatio: false }} style={{ width: '100%', height: '320px' }} />
+                ) : (
+                  <Bar data={getChartData()} options={{ responsive: true, maintainAspectRatio: false }} style={{ width: '100%', height: '320px' }} />
+                )}
               </div>
             </div>
           </div>
