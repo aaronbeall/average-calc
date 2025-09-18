@@ -138,7 +138,7 @@ const App: React.FC = () => {
       const parsedNumbers = parseEquation(savedExpression);
       if (parsedNumbers.length > 0) {
         setNumbers(parsedNumbers);
-        calculateStats(parsedNumbers);
+        updateResults(parsedNumbers);
       }
     }
   }, []);
@@ -152,27 +152,26 @@ const App: React.FC = () => {
 
   // Move pinned set left
   const handleMovePinnedSetLeft = (index: number) => {
-  if (index >= pinnedSets.length - 1) return;
-  const updated = [...pinnedSets];
-  [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-  updatePinnedSets(updated);
+    if (index >= pinnedSets.length - 1) return;
+    const updated = [...pinnedSets];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    updatePinnedSets(updated);
   };
 
   // Move pinned set right
   const handleMovePinnedSetRight = (index: number) => {
-  if (index <= 0) return;
-  const updated = [...pinnedSets];
-  [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-  updatePinnedSets(updated);
+    if (index <= 0) return;
+    const updated = [...pinnedSets];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    updatePinnedSets(updated);
   };
 
   // Change color of pinned set
   const handleChangePinnedSetColor = (index: number) => {
-  const updated = [...pinnedSets];
-  updated[index].color = getRandomColor();
-  updatePinnedSets(updated);
+    const updated = [...pinnedSets];
+    updated[index].color = getRandomColor();
+    updatePinnedSets(updated);
   };
-
   // Handle real-time parsing and calculation
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -189,7 +188,7 @@ const App: React.FC = () => {
     const parsedNumbers = parseEquation(value);
     if (parsedNumbers.length > 0) {
       setNumbers(parsedNumbers);
-      calculateStats(parsedNumbers);
+      updateResults(parsedNumbers);
     } else {
       setNumbers([]);
       setResults(null);
@@ -204,6 +203,10 @@ const App: React.FC = () => {
 
     return matches ? matches.map((match) => parseFloat(match)) : [];
   };
+
+  const updateResults = (nums: number[]) => {
+    setResults(calculateStats(nums));
+  }
 
   // Calculate min, max, median, mean, and total
   const calculateStats = (nums: number[]) => {
@@ -220,13 +223,13 @@ const App: React.FC = () => {
       median = sortedNumbers[Math.floor(length / 2)];
     }
 
-    setResults({
+    return {
       total,
       median,
       mean: total / length,
       min,
       max,
-    });
+    };
   };
 
   // Remove a number from the list and recalculate stats
@@ -234,7 +237,7 @@ const App: React.FC = () => {
     const updatedNumbers = [...numbers];
     updatedNumbers.splice(index, 1);
     setNumbers(updatedNumbers);
-    calculateStats(updatedNumbers);
+    updateResults(updatedNumbers);
   };
 
   // Clear input and results
@@ -284,25 +287,8 @@ const App: React.FC = () => {
     const parsedNumbers = parseEquation(newValue); // Parse the input just like the main input
 
     if (parsedNumbers.length > 0) {
-      const sortedNumbers = [...parsedNumbers].sort((a, b) => a - b);
-      const length = sortedNumbers.length;
-      let median;
-      if (length % 2 === 0) {
-        median = (sortedNumbers[length / 2 - 1] + sortedNumbers[length / 2]) / 2;
-      } else {
-        median = sortedNumbers[Math.floor(length / 2)];
-      }
-      const total = parsedNumbers.reduce((a, b) => a + b, 0);
-      const min = length > 0 ? sortedNumbers[0] : 0;
-      const max = length > 0 ? sortedNumbers[length - 1] : 0;
       updatedPinnedSets[setIndex].numbers = parsedNumbers;
-      updatedPinnedSets[setIndex].results = {
-        total,
-        median,
-        mean: length > 0 ? total / length : 0,
-        min,
-        max,
-      };
+      updatedPinnedSets[setIndex].results = calculateStats(parsedNumbers);
       updatePinnedSets(updatedPinnedSets); // Use helper function
     }
   };
@@ -323,22 +309,7 @@ const App: React.FC = () => {
     return numbers.map((num, i) => (i === 0 ? num : (num >= 0 ? `+${num}` : `${num}`))).join(' ');
   };
 
-    const [cumulative, setCumulative] = React.useState(false);
-
-  // Helper to get chart data in serial or cumulative mode
-  const getChartData = () => {
-    if (!cumulative) return chartData;
-    // Cumulative: sum up each dataset
-    const cumulate = (arr: number[]) => arr.reduce((acc, val, i) => {
-      acc.push((acc[i - 1] || 0) + val);
-      return acc;
-    }, [] as number[]);
-    const newDatasets = chartData.datasets.map(ds => ({
-      ...ds,
-      data: cumulate(ds.data as number[]),
-    }));
-    return { ...chartData, datasets: newDatasets };
-  };
+  const [cumulative, setCumulative] = React.useState(false);
 
   // Prepare data for the line chart, including pinned sets
   const chartData = {
@@ -360,6 +331,25 @@ const App: React.FC = () => {
       },
     ],
   };
+
+  // Helper to get chart data in serial or cumulative mode
+  const getChartData = () => {
+    if (!cumulative) return chartData;
+    // Cumulative: sum up each dataset
+    const cumulate = (arr: number[]) => arr.reduce((acc, val, i) => {
+      acc.push((acc[i - 1] || 0) + val);
+      return acc;
+    }, [] as number[]);
+    const newDatasets = chartData.datasets.map(ds => ({
+      ...ds,
+      data: cumulate(ds.data as number[]),
+    }));
+    return { ...chartData, datasets: newDatasets };
+  };
+
+  // Compute totals across all sets (current + pinned) using calculateStats
+  const allSets = [numbers, ...pinnedSets.map(set => set.numbers)].filter(arr => arr && arr.length > 0);
+  const totalsStats = calculateStats(allSets.flat());
 
   return (
     <Container className="mt-5" fluid>
@@ -419,7 +409,7 @@ const App: React.FC = () => {
         )}
 
         {/* Pinned sets */}
-        {[...pinnedSets].reverse().map((set, idx) => ( // No need for null checks
+        {[...pinnedSets].reverse().map((set, idx) => (
           <div key={idx}>
             <Alert
               variant="secondary"
@@ -486,6 +476,27 @@ const App: React.FC = () => {
             </Alert>
           </div>
         ))}
+
+        {/* Totals card across all sets */}
+        {totalsStats && (
+          <div>
+            <Alert
+              variant="success"
+              style={{
+                // borderLeft removed
+                background: 'linear-gradient(90deg, #e8f5e9 60%, #f8fff8 100%)',
+                color: '#1e824c',
+                fontWeight: 600,
+                boxShadow: '0 2px 8px rgba(30,130,76,0.07)',
+                minWidth: 0,
+                marginBottom: 0,
+              }}
+            >
+              <div style={{ fontSize: '1.08em', fontWeight: 700, marginBottom: 4, color: '#1e824c' }}>Totals (All Sets)</div>
+              <ResultsText total={totalsStats.total} median={totalsStats.median} mean={totalsStats.mean} min={totalsStats.min} max={totalsStats.max} />
+            </Alert>
+          </div>
+        )}
       </div>
 
       {/* Line Chart */}
