@@ -2,10 +2,10 @@
 import tinycolor from 'tinycolor2';
 import React, { useState, useEffect } from 'react';
 import logo from '../public/logo.svg';
-import { Container, Form, Button, Alert, Badge } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartArea, FaChartBar, FaSort, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
+import { FaThumbtack, FaCog, FaTrash, FaPalette, FaArrowLeft, FaArrowRight, FaChartLine, FaChartBar, FaSort, FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 import { Dropdown } from 'react-bootstrap';
 
 
@@ -263,13 +263,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Clear input and results
-  const handleClear = () => {
-    setInputValue('');
-    setNumbers([]);
-    setResults(null);
-  };
-
   const updatePinnedSets = (newPinnedSets: PinnedSet[]) => {
     setPinnedSets(newPinnedSets);
     localStorage.setItem('pinnedSets', JSON.stringify(newPinnedSets)); // Save to local storage
@@ -335,12 +328,17 @@ const App: React.FC = () => {
   const [cumulative, setCumulative] = React.useState(false);
 
   // Prepare data for the chart, including pinned sets
+  // Compute the largest set length for x-axis
+  const allChartSets = [...pinnedSets.map((set) => set.numbers), numbers];
+  const maxSetLength = Math.max(0, ...allChartSets.map(arr => arr.length));
+  const chartLabels = Array.from({ length: maxSetLength }, (_, i) => `${i + 1}`);
+
   const chartData = {
-    labels: numbers.map((_, index) => `Index ${index + 1}`),
+    labels: chartLabels,
     datasets: [
       ...pinnedSets.map((set) => ({
         label: set.name,
-        data: set.numbers,
+        data: [...set.numbers, ...Array(maxSetLength - set.numbers.length).fill(null)],
         fill: false,
         borderColor: set.color,
         backgroundColor: set.color,
@@ -348,7 +346,7 @@ const App: React.FC = () => {
       })),
       {
         label: 'Current Numbers',
-        data: numbers,
+        data: [...numbers, ...Array(maxSetLength - numbers.length).fill(null)],
         fill: false,
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
